@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../Provider/AuthProvider";
 import BookingsRow from "./BookingsRow";
+import axios from "axios";
 
 const Bookings = () => {
 
@@ -9,10 +10,21 @@ const Bookings = () => {
 
     const url = `http://localhost:5000/bookings?email=${user?.email}`;
     useEffect(() => {
-        fetch(url)
-            .then(res => res.json())
-            .then(data => setBookings(data))
+
+        axios.get(url, {withCredentials:true})
+            .then(res => {
+                setBookings(res.data);
+            })
+
+        // fetch(url)
+        //     .then(res => res.json())
+        //     .then(data => setBookings(data))
     }, [url])
+
+
+
+
+
     const handleDelete = id => {
         const proceed = confirm('Are You Sure??')
         if (proceed) {
@@ -24,7 +36,7 @@ const Bookings = () => {
                     console.log(data);
                     if (data.deletedCount > 0) {
                         alert('DELETED ')
-                        const reamining = bookings.filter(booking => booking._id!== id)
+                        const reamining = bookings.filter(booking => booking._id !== id)
                         setBookings(reamining);
                     }
                 })
@@ -32,27 +44,27 @@ const Bookings = () => {
     }
 
 
-    const handleConfirm =id =>{
-        fetch(`http://localhost:5000/bookings/${id}`,{
+    const handleConfirm = id => {
+        fetch(`http://localhost:5000/bookings/${id}`, {
             method: 'PATCH',
-            headers:{
+            headers: {
                 'content-type': 'application/json'
             },
-            body: JSON.stringify({status:'confirm'})
+            body: JSON.stringify({ status: 'confirm' })
         })
-        .then(res=>res.json())
-        .then(data =>{
-            console.log(data);
-            if(data.modifiedCount >0){
-                // Update State
-                const reamining= bookings.filter(booking =>booking._id!==id);
-                const updated= bookings.find(booking=>booking._id === id);
-                updated.status='confirm'
-                const newBookings = [updated, ...reamining];
-                setBookings(newBookings);
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                if (data.modifiedCount > 0) {
+                    // Update State
+                    const reamining = bookings.filter(booking => booking._id !== id);
+                    const updated = bookings.find(booking => booking._id === id);
+                    updated.status = 'confirm'
+                    const newBookings = [updated, ...reamining];
+                    setBookings(newBookings);
 
-            }
-        })
+                }
+            })
     }
 
     return (
@@ -76,17 +88,17 @@ const Bookings = () => {
                         </tr>
                     </thead>
                     <tbody>
-                       {
-                        bookings.map(booking=><BookingsRow 
-                        key={booking._id}
-                        booking={booking}
-                        handleDelete={handleDelete}
-                        handleConfirm={handleConfirm}
-                        ></BookingsRow>)
-                       }
-                      
+                        {
+                            bookings.map(booking => <BookingsRow
+                                key={booking._id}
+                                booking={booking}
+                                handleDelete={handleDelete}
+                                handleConfirm={handleConfirm}
+                            ></BookingsRow>)
+                        }
+
                     </tbody>
-                 
+
 
                 </table>
             </div>
